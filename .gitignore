@@ -1,0 +1,10 @@
+# Ignore Visual Studio temporary files
+.vs/
+*.user
+*.suo
+*.vscode/
+*.vsidx
+
+# Build results
+bin/
+obj/
