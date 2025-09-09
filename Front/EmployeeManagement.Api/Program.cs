@@ -1,4 +1,5 @@
-﻿using EmployeeManagement.Application;
+﻿using EmployeeManagement.Api.Middlewares;
+using EmployeeManagement.Application;
 using EmployeeManagement.Domain.Entities;
 using EmployeeManagement.Infrastructure;
 using EmployeeManagement.Infrastructure.Repositories;
@@ -27,6 +28,8 @@ builder.Services.AddOpenApi();
 var app = builder.Build();
 
 await SeedInitialData(app);
+
+app.UseMiddleware<ErrorHandlerMiddleware>();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())

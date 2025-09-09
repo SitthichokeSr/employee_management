@@ -1,5 +1,6 @@
-﻿using FluentValidation;
-using FluentValidation.AspNetCore;
+﻿using EmployeeManagement.Application.Behaviour;
+using FluentValidation;
+using MediatR;
 using Microsoft.Extensions.DependencyInjection;
 using System.Reflection;
 
@@ -10,7 +11,7 @@ namespace EmployeeManagement.Application
         public static void AddApplicationLayer(this IServiceCollection services)
         {
             services.AddValidatorsFromAssembly(Assembly.GetExecutingAssembly());
-            services.AddFluentValidationAutoValidation().AddFluentValidationClientsideAdapters();
+            services.AddTransient(typeof(IPipelineBehavior<,>), typeof(ValidationBehaviour<,>));
             services.AddAutoMapper(Assembly.GetExecutingAssembly());
             services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(Assembly.GetExecutingAssembly()));
         }

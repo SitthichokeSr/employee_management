@@ -25,27 +25,14 @@ namespace EmployeeManagement.Application.Features
 
         public async Task<EmployeeDto> Handle(GetEmployeeByIdQuery request, CancellationToken cancellationToken)
         {
-            var response = new EmployeeDto();
+            var model = await _employeeRepository.GetByIdAsync(request.id);
 
-            try
+            if (model == null || model.Id == 0)
             {
-                var model = await _employeeRepository.GetByIdAsync(request.id);
-
-                if (model == null || model.Id == 0)
-                {
-                    throw new KeyNotFoundException($"employee with id {request.id} not found.");
-                }
-
-                response = _mapper.Map<EmployeeDto>(model);
-
-                return response;
-            }
-            catch
-            {
-                throw new KeyNotFoundException();
+                throw new KeyNotFoundException($"employee with id {request.id} not found.");
             }
 
-            return response;
+            return _mapper.Map<EmployeeDto>(model);
         }
     }
 }

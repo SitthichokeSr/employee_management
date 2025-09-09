@@ -22,27 +22,20 @@ namespace EmployeeManagement.Application.Features
         {
             var response = false;
 
-            try
+            var model = await _employeeRepository.GetByIdAsync(request.id);
+
+            if (model == null || model.Id == 0)
             {
-                var model = await _employeeRepository.GetByIdAsync(request.id);
-
-                if (model == null || model.Id == 0)
-                {
-                    throw new KeyNotFoundException($"employee with id {request.id} not found.");
-                }
-
-                model.Delete();
-
-                await _employeeRepository.DeleteAsync(model);
-
-                if (model.Id > 0)
-                {
-                    return true;
-                }
+                throw new KeyNotFoundException($"employee with id {request.id} not found.");
             }
-            catch
+
+            model.Delete();
+
+            await _employeeRepository.DeleteAsync(model);
+
+            if (model.Id > 0)
             {
-                throw new KeyNotFoundException();
+                response = true;
             }
 
             return response;

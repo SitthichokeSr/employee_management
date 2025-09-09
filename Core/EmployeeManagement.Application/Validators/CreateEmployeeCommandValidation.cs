@@ -20,11 +20,13 @@ namespace EmployeeManagement.Application.Validators
 
             RuleFor(x => x.hire_date)
                 .NotEmpty()
-                .Must(h => h <= DateTimeOffset.Now).WithMessage("Hire date cannot be in the future.");
+                .Must(h => h <= DateTimeOffset.Now)
+                .WithMessage(x => $"Hire date ({x.hire_date}) cannot be in the future. Current time is ({DateTimeOffset.Now}).");
 
             RuleFor(x => x.salary)
                 .PrecisionScale(20, 6, false)
-                .GreaterThanOrEqualTo(0).WithMessage("Salary must be a non-negative value.");
+                .GreaterThanOrEqualTo(0)
+                .WithMessage("Salary must be a non-negative value.");
 
             RuleFor(x => x.dept_no)
                 .NotEmpty();

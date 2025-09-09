@@ -3,11 +3,6 @@
 public sealed class Employee
 {
     public int Id { get; set; }
-    public DateTimeOffset Created { get; set; } = DateTimeOffset.Now;
-    public DateTimeOffset Modified { get; set; } = DateTimeOffset.Now;
-    public DateTimeOffset? Deleted { get; set; }
-    public bool IsDeleted { get; set; } = false;
-    public bool IsEnabled { get; set; } = true;
     public int EMPNO { get; set; }
     public string FIRST_NAME { get; set; }
     public string LAST_NAME { get; set; }
@@ -16,12 +11,17 @@ public sealed class Employee
     public decimal SALARY { get; set; }
     public int? COMM { get; set; }
     public int DEPTNO { get; set; }
+    public DateTimeOffset Created { get; set; } = DateTimeOffset.Now;
+    public DateTimeOffset Modified { get; set; } = DateTimeOffset.Now;
+    public DateTimeOffset? Deleted { get; set; }
+    public bool IsDeleted { get; set; } = false;
+    public bool IsEnabled { get; set; } = true;
 
     public Employee() { }
 
     public Employee(int empNo, string firstName, string lastName, string designation, DateTimeOffset hireDate, decimal salary, int? comm, int deptNo)
     {
-        this.EMPNO = empNo + 1;
+        this.EMPNO = empNo;
         this.FIRST_NAME = firstName;
         this.LAST_NAME = lastName;
         this.DESIGNATION = designation;

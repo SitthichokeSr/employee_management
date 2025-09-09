@@ -1,5 +1,6 @@
 ﻿using EmployeeManagement.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
+using System.Diagnostics;
 
 namespace EmployeeManagement.Infrastructure.Repositories;
 
@@ -12,25 +13,32 @@ public class EmployeeRepository : IEmployeeRepository
         _dbContext = dbContext;
     }
 
-    public async Task<Employee> CreateAsync(string firstName, string lastName, string designation, DateTimeOffset hireDate, decimal salary, int? comm, int deptNo)
+    public async Task<Employee?> CreateAsync(Employee item)
     {
-        var listEmployee = _dbContext.Employees.Where(x => x.IsEnabled).AsQueryable();
-
-        var isExisting = await listEmployee.Where(x => x.FIRST_NAME == firstName && x.LAST_NAME == lastName).ToListAsync();
-
-        if (isExisting?.Any() == true)
+        try
         {
-            throw new KeyNotFoundException($"employee with first name {firstName} and last name {lastName} already exists");
+            var isExisting = await _dbContext.Employees.AnyAsync(x => x.IsEnabled && x.FIRST_NAME == item.FIRST_NAME && x.LAST_NAME == item.LAST_NAME);
+
+            if (isExisting)
+            {
+                throw new InvalidOperationException($"Employee with first name {item.FIRST_NAME} and last name {item.LAST_NAME} already exists");
+            }
+
+            // condition for test, this approach has a potential race condition.
+            int latestEmpNo = await _dbContext.Employees.OrderByDescending(x => x.EMPNO).Select(x => x.EMPNO).FirstOrDefaultAsync();
+
+            item.EMPNO = latestEmpNo + 1;
+
+            await _dbContext.Employees.AddAsync(item);
+            await _dbContext.SaveChangesAsync();
+
+            return item;
         }
-
-        int latestEmpNo = await listEmployee.OrderByDescending(x => x.EMPNO).Select(x => x.EMPNO).FirstOrDefaultAsync();
-
-        var model = new Employee(latestEmpNo, firstName, lastName, designation, hireDate, salary, comm, deptNo);
-
-        await _dbContext.Employees.AddAsync(model);
-        await _dbContext.SaveChangesAsync();
-
-        return model;
+        catch (Exception e)
+        {
+            Debug.WriteLine($"An error occurred: {e.Message}");
+            return null;
+        }
     }
 
     public async Task<Employee> DeleteAsync(Employee item)
@@ -60,20 +68,26 @@ public class EmployeeRepository : IEmployeeRepository
         return items;
     }
 
-    public async Task<Employee> UpdateAsync(Employee item)
+    public async Task<Employee?> UpdateAsync(Employee item)
     {
-        var listEmployee = _dbContext.Employees.Where(x => x.IsEnabled).AsQueryable();
-
-        var isExisting = await listEmployee.Where(x => x.Id != item.Id && x.FIRST_NAME == item.FIRST_NAME && x.LAST_NAME == item.LAST_NAME).ToListAsync();
-
-        if (isExisting?.Any() == true)
+        try
         {
-            throw new KeyNotFoundException($"employee with first name {item.FIRST_NAME} and last name {item.LAST_NAME} already exists");
+            var isExisting = await _dbContext.Employees.AnyAsync(x => x.IsEnabled && x.FIRST_NAME == item.FIRST_NAME && x.LAST_NAME == item.LAST_NAME);
+
+            if (isExisting)
+            {
+                throw new InvalidOperationException($"Employee with first name {item.FIRST_NAME} and last name {item.LAST_NAME} already exists");
+            }
+
+            _dbContext.Employees.Update(item);
+            await _dbContext.SaveChangesAsync();
+
+            return item;
         }
-
-        _dbContext.Employees.Update(item);
-        await _dbContext.SaveChangesAsync();
-
-        return item;
+        catch (Exception e)
+        {
+            Debug.WriteLine($"An error occurred: {e.Message}");
+            return null;
+        }
     }
 }

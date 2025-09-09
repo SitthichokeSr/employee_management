@@ -9,6 +9,5 @@ namespace EmployeeManagement.Infrastructure.Repositories
         {
             services.AddScoped<IEmployeeRepository, EmployeeRepository>();
         }
-
     }
 }

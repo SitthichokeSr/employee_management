@@ -33,25 +33,16 @@ namespace EmployeeManagement.Application.Features
         {
             var response = new ListEmployeeResponse();
 
-            try
+            var keyword = request.keyword != null ? request.keyword.Trim() : null;
+
+            var list = await _employeeRepository.ListAsync(keyword);
+
+            if (list?.Any() == true)
             {
-                var keyword = request.keyword != null ? request.keyword.Trim() : null;
+                var items = _mapper.Map<IReadOnlyList<EmployeeDto>>(list);
 
-                var list = await _employeeRepository.ListAsync(keyword);
-
-                if (list?.Any() == true)
-                {
-                    var items = _mapper.Map<IReadOnlyList<EmployeeDto>>(list);
-
-                    response.items = items;
-                    response.no_record = list.Count;
-
-                    return response;
-                }
-            }
-            catch
-            {
-                throw new KeyNotFoundException();
+                response.items = items;
+                response.no_record = list.Count;
             }
 
             return response;

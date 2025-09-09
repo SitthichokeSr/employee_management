@@ -44,7 +44,6 @@ namespace EmployeeManagement.Api.Controllers
         public async Task<IActionResult> CreateAsync([FromBody] CreateEmployeeCommand query)
         {
             var response = await _mediator.Send(query);
-
             return Ok(response);
         }
 

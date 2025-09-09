@@ -27,33 +27,23 @@ namespace EmployeeManagement.Application.Features
 
         public async Task<int> Handle(UpdateEmployeeCommand request, CancellationToken cancellationToken)
         {
-            var response = new int();
+            var model = await _employeeRepository.GetByIdAsync(request.id);
 
-            try
+            if (model == null || model.Id == 0)
             {
-                var model = await _employeeRepository.GetByIdAsync(request.id);
-
-                if (model == null || model.Id == 0)
-                {
-                    throw new KeyNotFoundException($"employee with id {request.id} not found.");
-                }
-
-                model.Update(request.first_name, request.last_name, request.designation, request.hire_date, request.salary, request.comm, request.dept_no);
-
-                await _employeeRepository.UpdateAsync(model);
-
-                if (model.Id > 0)
-                {
-                    response = model.Id;
-                    return response;
-                }
-            }
-            catch
-            {
-                throw new KeyNotFoundException();
+                throw new KeyNotFoundException($"employee with id {request.id} not found.");
             }
 
-            return response;
+            model.Update(request.first_name, request.last_name, request.designation, request.hire_date, request.salary, request.comm, request.dept_no);
+
+            var result = await _employeeRepository.UpdateAsync(model);
+
+            if (result == null || model.Id <= 0)
+            {
+                throw new InvalidOperationException("failed to update the employee.");
+            }
+
+            return result.Id;
         }
     }
 }

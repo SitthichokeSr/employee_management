@@ -1,4 +1,5 @@
-﻿using EmployeeManagement.Infrastructure.Repositories;
+﻿using EmployeeManagement.Domain.Entities;
+using EmployeeManagement.Infrastructure.Repositories;
 using MediatR;
 
 namespace EmployeeManagement.Application.Features
@@ -26,24 +27,18 @@ namespace EmployeeManagement.Application.Features
 
         public async Task<int> Handle(CreateEmployeeCommand request, CancellationToken cancellationToken)
         {
-            var response = new int();
+            int empNo = 0;
 
-            try
-            {
-                var model = await _employeeRepository.CreateAsync(request.first_name, request.last_name, request.designation, request.hire_date, request.salary, request.comm, request.dept_no);
+            var model = new Employee(empNo, request.first_name, request.last_name, request.designation, request.hire_date, request.salary, request.comm, request.dept_no);
 
-                if (model != null && model.Id > 0)
-                {
-                    response = model.Id;
-                    return response;
-                }
-            }
-            catch
+            var result = await _employeeRepository.CreateAsync(model);
+
+            if (result == null || result.Id <= 0)
             {
-                throw new KeyNotFoundException();
+                throw new InvalidOperationException("failed to create the employee.");
             }
 
-            return response;
+            return result.Id;
         }
     }
 }
